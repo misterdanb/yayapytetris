@@ -49,6 +49,16 @@ class Texture(object):
         glDeleteTextures(self.tex_id)
 
 class Game(object):
+    BUTTON_UP = 4
+    BUTTON_DOWN = 5
+    BUTTON_LEFT = 6
+    BUTTON_RIGHT = 7
+
+    BUTTON_A = 12
+    BUTTON_B = 13
+
+    BUTTON_START = 15
+
     def __init__(self, config):
         self.config = config
         self.mode = "opengl"
@@ -64,16 +74,20 @@ class Game(object):
         self.fall_speed = self.config.get_automatic_fall_start_speed()
         self.fall_field_counter = 0
         self.fall_speed_up_counter = 0
+
+        self.game_over = False
         
     def start(self):
         pygame.init()
-		pygame.joystick.init()
-		
-		# Enumerate joysticks
+        pygame.joystick.init()
+
+        self.joystick_names = []
+        
+        # Enumerate joysticks
         for i in range(0, pygame.joystick.get_count()):
             self.joystick_names.append(pygame.joystick.Joystick(i).get_name())
  
-        print self.joystick_names
+        print(self.joystick_names)
  
         # By default, load the first available joystick.
         if (len(self.joystick_names) > 0):
@@ -137,8 +151,8 @@ class Game(object):
         self.gl_orbit_angle = 140.0
 
         self.gl_cam_elevation = 20.0
-        self.gl_cam_distance = 16.0
-        self.gl_cam_fov = 20.0
+        self.gl_cam_distance = 4.0
+        self.gl_cam_fov = 80.0
         self.gl_cam_aspect = 1.0
 
         self.gl_light_pos = [ 0.0, 1.0, 1.0 ]
@@ -230,9 +244,30 @@ class Game(object):
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.running = False
-			elif event.type == JOYBUTTONDOWN:
-				for i in range(self.my_joystick.get_numbuttons()):
-					print(str(i) + ": " + str(self.my_joystick,get_button(i)))
+            elif event.type == JOYBUTTONDOWN:
+                if self.my_joystick.get_button(self.BUTTON_UP):
+                    pass
+                elif self.my_joystick.get_button(self.BUTTON_DOWN):
+                    if self.current_block.check_for_collision(self.game_field,
+                                                              (self.current_block.get_position()[0],
+                                                               self.current_block.get_position()[1] + 1)):
+                        self.game_field.merge_block(self.current_block)
+                        self.generate_new_block()
+
+                        if self.current_block.check_for_collision(self.game_field, self.current_block.get_position()):
+                            pygame.event.post(pygame.event.Event(QUIT))
+                    else:
+                        self.current_block.move_down(self.game_field)
+                elif self.my_joystick.get_button(self.BUTTON_LEFT):
+                    self.current_block.move_left(self.game_field)
+                elif self.my_joystick.get_button(self.BUTTON_RIGHT):
+                    self.current_block.move_right(self.game_field)
+                elif self.my_joystick.get_button(self.BUTTON_A):
+                    self.current_block.rotate_left(self.game_field)
+                elif self.my_joystick.get_button(self.BUTTON_B):
+                    self.current_block.rotate_right(self.game_field)
+                elif self.my_joystick.get_button(self.BUTTON_START):
+                    pass
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.event.post(pygame.event.Event(QUIT))
@@ -259,6 +294,13 @@ class Game(object):
                     self.current_block.rotate_left(self.game_field)
                 elif event.key == K_PERIOD:
                     self.current_block.rotate_right(self.game_field)
+            elif event.type == MOUSEBUTTONDOWN:
+                if event.button == 4:
+                    self.gl_cam_fov *= 0.9
+                    self.gl_cam_distance /= 0.9
+                elif event.button == 5:
+                    self.gl_cam_fov /= 0.9
+                    self.gl_cam_distance *= 0.9
             elif event.type == MOUSEMOTION:
                 if pygame.mouse.get_pressed()[0]:
                     rel_motion = pygame.mouse.get_rel()
@@ -286,7 +328,8 @@ class Game(object):
                 self.generate_new_block()
                 
                 if self.current_block.check_for_collision(self.game_field, self.current_block.get_position()):
-                    pygame.event.post(pygame.event.Event(QUIT))
+                    #pygame.event.post(pygame.event.Event(QUIT))
+                    self.game_over = True
             else:
                 self.current_block.move_down(self.game_field)
         
@@ -295,8 +338,11 @@ class Game(object):
     def process_graphics(self):
         self.screen.fill((0, 0, 0))
 
-        self.game_field.draw(self.screen)
-        self.current_block.draw(self.screen)
+        if not self.game_over:
+            self.game_field.draw(self.screen)
+            self.current_block.draw(self.screen)
+        else:
+            pass
 
         if self.mode == "opengl":
             self.texture.update()
