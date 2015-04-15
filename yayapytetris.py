@@ -74,12 +74,14 @@ class Game(object):
         self.fall_speed = self.config.get_automatic_fall_start_speed()
         self.fall_field_counter = 0
         self.fall_speed_up_counter = 0
-
+        
         self.game_over = False
         
     def start(self):
         pygame.init()
         pygame.joystick.init()
+        
+        self.font = pygame.font.SysFont("comicsansms", 72)
 
         self.joystick_names = []
         
@@ -139,6 +141,13 @@ class Game(object):
         pygame.key.set_repeat(1, 100)
         
         self.game_loop()
+
+    def reset(self):
+        self.game_field = field.GameField(self.config)
+        self.current_block = None
+        self.fall_speed = self.config.get_automatic_fall_start_speed()
+        self.fall_field_counter = 0
+        self.fall_speed_up_counter = 0
 
     def gl_init(self):
         self.texture = Texture(self.screen)
@@ -253,9 +262,6 @@ class Game(object):
                                                                self.current_block.get_position()[1] + 1)):
                         self.game_field.merge_block(self.current_block)
                         self.generate_new_block()
-
-                        if self.current_block.check_for_collision(self.game_field, self.current_block.get_position()):
-                            pygame.event.post(pygame.event.Event(QUIT))
                     else:
                         self.current_block.move_down(self.game_field)
                 elif self.my_joystick.get_button(self.BUTTON_LEFT):
@@ -267,7 +273,11 @@ class Game(object):
                 elif self.my_joystick.get_button(self.BUTTON_B):
                     self.current_block.rotate_right(self.game_field)
                 elif self.my_joystick.get_button(self.BUTTON_START):
-                    pass
+                    if self.game_over:
+                        self.reset()
+
+                        self.game_over = False
+                        self.generate_new_block()
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.event.post(pygame.event.Event(QUIT))
@@ -276,6 +286,12 @@ class Game(object):
                 elif event.key == K_RIGHT:
                     self.current_block.move_right(self.game_field)
                 elif event.key == K_UP:
+                    if self.game_over:
+                        self.reset()
+
+                        self.game_over = False
+                        self.generate_new_block()
+
                     # hahaha... no.jpg
                     #self.current_block.move_up(self.game_field)
                     pass
@@ -285,9 +301,6 @@ class Game(object):
                                                                self.current_block.get_position()[1] + 1)):
                         self.game_field.merge_block(self.current_block)
                         self.generate_new_block()
-
-                        if self.current_block.check_for_collision(self.game_field, self.current_block.get_position()):
-                            pygame.event.post(pygame.event.Event(QUIT))
                     else:
                         self.current_block.move_down(self.game_field)
                 elif event.key == K_COMMA:
@@ -342,7 +355,10 @@ class Game(object):
             self.game_field.draw(self.screen)
             self.current_block.draw(self.screen)
         else:
-            pass
+            # this would horribly crash when not using opengl mode. but fuck that
+            if self.mode == "opengl":
+                text = self.font.render("Game over!", True, (255, 255, 255))
+                self.screen.blit(text, (self.tex_width // 2 - text.get_width() // 2, self.tex_height // 2 - text.get_height() // 2))
 
         if self.mode == "opengl":
             self.texture.update()
