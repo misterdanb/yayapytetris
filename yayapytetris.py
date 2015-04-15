@@ -67,6 +67,22 @@ class Game(object):
         
     def start(self):
         pygame.init()
+		pygame.joystick.init()
+		
+		# Enumerate joysticks
+        for i in range(0, pygame.joystick.get_count()):
+            self.joystick_names.append(pygame.joystick.Joystick(i).get_name())
+ 
+        print self.joystick_names
+ 
+        # By default, load the first available joystick.
+        if (len(self.joystick_names) > 0):
+            self.my_joystick = pygame.joystick.Joystick(0)
+            self.my_joystick.init()
+ 
+        max_joy = max(self.my_joystick.get_numaxes(), 
+                      self.my_joystick.get_numbuttons(), 
+                      self.my_joystick.get_numhats())
         
         if self.mode == "fb":
             self.pyscope = pyscope.pyscope()
@@ -214,6 +230,9 @@ class Game(object):
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.running = False
+			elif event.type == JOYBUTTONDOWN:
+				for i in range(self.my_joystick.get_numbuttons()):
+					print(str(i) + ": " + str(self.my_joystick,get_button(i)))
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     pygame.event.post(pygame.event.Event(QUIT))
