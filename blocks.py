@@ -1,10 +1,10 @@
 import pygame
 from pygame.locals import *
-
 import random
+import elements
 
 class GameBlock(object):
-    def __init__(self, config, position, size, mask, color=(255, 255, 255), start_block=0):
+    def __init__(self, config, position, size, mask, color=[ 255, 255, 255 ], start_block=0):
         self.config = config
         
         self.position = position
@@ -79,7 +79,13 @@ class GameBlock(object):
                        x < self.config.get_field_size()[0] and \
                        y < self.config.get_field_size()[1]:
                         compositing_field[x][y] = self.color
-    
+
+    def draw(self, screen):
+        for x in range(self.position[0], self.position[0] + self.size[0]):
+            for y in range(self.position[1], self.position[1] + self.size[1]):
+                if self.mask[self.current_block % 4][x - self.position[0]][y - self.position[1]] == 1:
+                    elements.draw_element(screen, self.config, x, y, self.color)
+
     def get_position(self):
         return self.position
     
@@ -93,7 +99,7 @@ class GameBlock(object):
         return self.color
 
 class I(GameBlock):
-    def __init__(self, config, position=(0, 0), color=(255, 255, 255)):
+    def __init__(self, config, position=(0, 0), color=(255, 255, 0)):
         block_0 = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]]
         block_1 = [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]]
         block_2 = [[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]]
@@ -102,7 +108,7 @@ class I(GameBlock):
         super(I, self).__init__(config, position, (4, 4), (block_0, block_1, block_2, block_3), color)
 
 class WrongL(GameBlock):
-    def __init__(self, config, position=(0, 0), color=(255, 255, 255)):
+    def __init__(self, config, position=(0, 0), color=(0, 0, 255)):
         block_0 = [[1, 1, 0], [0, 1, 0], [0, 1, 0]]
         block_1 = [[0, 0, 0], [1, 1, 1], [1, 0, 0]]
         block_2 = [[0, 1, 0], [0, 1, 0], [0, 1, 1]]
@@ -111,7 +117,7 @@ class WrongL(GameBlock):
         super(WrongL, self).__init__(config, position, (3, 3), (block_0, block_1, block_2, block_3), color)
 
 class L(GameBlock):
-    def __init__(self, config, position=(0, 0), color=(255, 255, 255)):
+    def __init__(self, config, position=(0, 0), color=(128, 128, 0)):
         block_0 = [[0, 1, 0], [0, 1, 0], [1, 1, 0]]
         block_1 = [[0, 0, 0], [1, 1, 1], [0, 0, 1]]
         block_2 = [[0, 1, 1], [0, 1, 0], [0, 1, 0]]
@@ -120,7 +126,7 @@ class L(GameBlock):
         super(L, self).__init__(config, position, (3, 3), (block_0, block_1, block_2, block_3), color)
 
 class O(GameBlock):
-    def __init__(self, config, position=(0, 0), color=(255, 255, 255)):
+    def __init__(self, config, position=(0, 0), color=(0, 255, 0)):
         block_0 = [[1,1], [1,1]]
         block_1 = [[1,1], [1,1]]
         block_2 = [[1,1], [1,1]]
@@ -129,7 +135,7 @@ class O(GameBlock):
         super(O, self).__init__(config, position, (2, 2), (block_0, block_1, block_2, block_3), color)
 
 class WrongN(GameBlock):
-    def __init__(self, config, position=(0, 0), color=(255, 255, 255)):
+    def __init__(self, config, position=(0, 0), color=(255, 0, 255)):
         block_0 = [[0, 1, 0], [1, 1, 0], [1, 0, 0]]
         block_1 = [[0, 0, 0], [1, 1, 0], [0, 1, 1]]
         block_2 = [[0, 0, 1], [0, 1, 1], [0, 1, 0]]
@@ -138,7 +144,7 @@ class WrongN(GameBlock):
         super(WrongN, self).__init__(config, position, (3, 3), (block_0, block_1, block_2, block_3), color)
 
 class T(GameBlock):
-    def __init__(self, config, position=(0, 0), color=(255, 255, 255)):
+    def __init__(self, config, position=(0, 0), color=(0, 0, 255)):
         block_0 = [[0, 1, 0], [1, 1, 0], [0, 1, 0]]
         block_1 = [[0, 0, 0], [1, 1, 1], [0, 1, 0]]
         block_2 = [[0, 1, 0], [0, 1, 1], [0, 1, 0]]
@@ -147,7 +153,7 @@ class T(GameBlock):
         super(T, self).__init__(config, position, (3, 3), (block_0, block_1, block_2, block_3), color)
 
 class N(GameBlock):
-    def __init__(self, config, position=(0, 0), color=(255, 255, 255)):
+    def __init__(self, config, position=(0, 0), color=(255, 0, 0)):
         block_0 = [[1, 0, 0], [1, 1, 0], [0, 1, 0]]
         block_1 = [[0, 0, 0], [0, 1, 1], [1, 1, 0]]
         block_2 = [[0, 1, 0], [0, 1, 1], [0, 0, 1]]

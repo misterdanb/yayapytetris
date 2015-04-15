@@ -1,9 +1,12 @@
+import pygame
+import elements
+
 class GameField(object):
     def __init__(self, config):
         self.config = config
         
-        self.mask = [[0] * self.config.get_field_size()[1] for n in range(self.config.get_field_size()[0])]
-        self.colors = [[(0, 0, 0)] * self.config.get_field_size()[1] for n in range(self.config.get_field_size()[0])]
+        self.mask = [ [ 0 ] * self.config.get_field_size()[1] for n in range(self.config.get_field_size()[0]) ]
+        self.colors = [ [ (0, 0, 0) ] * self.config.get_field_size()[1] for n in range(self.config.get_field_size()[0]) ]
     
     def remove_full_lines(self):
         for i in range(self.config.get_field_size()[1]):
@@ -39,6 +42,16 @@ class GameField(object):
                        x < self.config.get_field_size()[0] and \
                        y < self.config.get_field_size()[1]:
                         compositing_field[x][y] = self.colors[x][y]
+
+    def draw(self, screen):
+        for x in range(self.config.get_field_size()[0]):
+            for y in range(self.config.get_field_size()[1]):
+                if self.mask[x][y] == 1:
+                    if x >= 0 and \
+                       y >= 0 and \
+                       x < self.config.get_field_size()[0] and \
+                       y < self.config.get_field_size()[1]:
+                        elements.draw_element(screen, self.config, x, y, self.colors[x][y])
     
     def get_mask(self):
         return self.mask

@@ -2,7 +2,7 @@ class GameConfig(object):
     def __init__(self, display_type="pygame",
                  tilt_screen=False,
                  field_size=(10, 20),
-                 block_pixel_size=(20, 20),
+                 block_pixel_size=(42, 42),
                  block_pixel_padding=(0, 0, 0, 0),
                  window_margin=(0, 0, 0, 0),
                  automatic_fall_start_speed=0.001,
